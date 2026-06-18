@@ -97,6 +97,9 @@ A structured format like "Label: X / Reasoning: Y"? JSON?
 What are the tradeoffs?]
 ```
 
+JSON, because we work with a format that supports it well i.e key: value pairs 
+
+Tradeoffs: Requesting structured JSON allows for deterministic parsing using Python's native json library rather than relying on brittle split/regex operations on unstructured prose. The main tradeoff is that LLMs can occasionally wrap JSON in markdown code blocks (json ... ) or append conversational preamble, which requires basic string sanitization before parsing.
 ---
 
 **Edge cases to handle in the prompt:**
@@ -105,7 +108,8 @@ What are the tradeoffs?]
 [blank — what if labeled_examples is empty? What if the description is very
 short? How does your prompt handle these?]
 ```
-
+1. Empty Examples: If labeled_examples is empty, the prompt omits the examples block entirely and relies purely on the baseline classification instructions.
+2. Sparse Descriptions: If the input description is too short, missing, or vague, the prompt explicitly instructs the LLM to output "unknown" as the label.
 ---
 
 ## classify_episode(description, labeled_examples)

@@ -51,14 +51,15 @@ def compute_accuracy(predictions: list[str], ground_truth: list[str]) -> float:
     """
     Compute overall classification accuracy.
 
-    TODO — Milestone 3:
-
     Accuracy = number of correct predictions / total predictions.
     A prediction is correct when it exactly matches the ground truth label.
-
-    Before writing code, complete specs/evaluation-spec.md.
     """
-    return 0.0
+    # Edge case: Handle empty lists safely
+    if not predictions or not ground_truth or len(predictions) != len(ground_truth):
+        return 0.0
+
+    correct_count = sum(1 for p, gt in zip(predictions, ground_truth) if p == gt)
+    return correct_count / len(predictions)
 
 
 def compute_per_class_accuracy(
@@ -67,23 +68,39 @@ def compute_per_class_accuracy(
     """
     Compute accuracy broken down by each label class.
 
-    TODO — Milestone 3 (complete after compute_accuracy):
-
     For each label in VALID_LABELS, compute:
       - "correct"  : number of episodes with this ground-truth label predicted correctly
       - "total"    : number of episodes with this ground-truth label
       - "accuracy" : correct / total (0.0 if total is 0)
 
-    Return a dict keyed by label. Example:
-      {
-        "interview": {"correct": 4, "total": 5, "accuracy": 0.8},
-        "solo":      {"correct": 5, "total": 5, "accuracy": 1.0},
-        ...
-      }
-
-    Before writing code, complete specs/evaluation-spec.md.
+    Return a dict keyed by label.
     """
-    return {label: {"correct": 0, "total": 0, "accuracy": 0.0} for label in VALID_LABELS}
+    # Initialize the nested dict with safe default parameters
+    per_class = {
+        label: {"correct": 0, "total": 0, "accuracy": 0.0} 
+        for label in VALID_LABELS
+    }
+
+    # Verify matching lengths to avoid index errors
+    if not predictions or not ground_truth or len(predictions) != len(ground_truth):
+        return per_class
+
+    # Iterate in parallel to compile counts per ground-truth class
+    for p, gt in zip(predictions, ground_truth):
+        if gt in per_class:
+            per_class[gt]["total"] += 1
+            if p == gt:
+                per_class[gt]["correct"] += 1
+
+    # Calculate individual accuracies, avoiding division by zero
+    for label in VALID_LABELS:
+        total = per_class[label]["total"]
+        if total > 0:
+            per_class[label]["accuracy"] = per_class[label]["correct"] / total
+        else:
+            per_class[label]["accuracy"] = 0.0
+
+    return per_class
 
 
 def format_evaluation_report(eval_results: dict) -> str:

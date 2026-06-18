@@ -275,4 +275,4 @@ Evidence is assembled from multiple sources. The episode has a story arc, not a 
     )
 
 if __name__ == "__main__":
-    demo.launch(theme=THEME, css=CSS)
+    demo.launch(theme=THEME, css=CSS, share=True)
